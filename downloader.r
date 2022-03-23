@@ -74,13 +74,14 @@ downloadInmateData <- function() {
 		# read it after <p>Last Statement:</p> ( hence the +1 )
 		if (!is.na(lastStatementLocationIdx) && (lastStatementLocationIdx) < length(mainContent)) {
 			# Let's check that their statement is not "No statement was made"
-			if (grepl("No statement was made", mainContent[lastStatementLocationIdx + 1] %>% html_text(), fixed=TRUE)) {
-				print("##### no last statement explicitly stated");
-				inmate_last_statements[i] = ''
-				next
-			}
 			for (nodeIdx in (lastStatementLocationIdx + 1):length(mainContent)) {
-				inmatesComment = paste(inmatesComment, mainContent[nodeIdx] %>% html_text())
+				potentialStmt = mainContent[nodeIdx] %>% html_text()
+				if (grepl("No statement was made", potentialStmt, fixed=TRUE) || gsub(" .,", "", potentialStmt, fixed = TRUE) == '') {
+					print("##### no last statement explicitly stated");
+					inmate_last_statements[i] = ''
+					next
+				}
+				inmatesComment = paste(inmatesComment, potentialStmt)
 			}
 		} else {
 			print("##### last statement not found on inmate's page");
