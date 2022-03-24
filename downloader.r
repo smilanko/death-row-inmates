@@ -20,8 +20,8 @@ fetchManuallyStoredInmateInfo <- function(execution_number) {
 
 tryToPrefillValueForTessaractKey <- function(text, key) {
 	matchIdx = match(1, str_detect(regex(gsub("[\"() ~*\\?°_]", "", text$word), ignore_case = TRUE), paste("^", key, sep="")))
-	if (is.na(matchIdx) ) ( return(""))
-	return(text$word[matchIdx + 1])
+	if (is.na(matchIdx) ) ( return("n/a"))
+	return(gsub("[\"() ~*?°_]", "", text$word[matchIdx + 1]))
 }
 
 downloadInmateData <- function() {
