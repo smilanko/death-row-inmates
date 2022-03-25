@@ -9,19 +9,19 @@ getInfoByKey <- function(mainContent, key) {
 	return(mainContent[match(1, str_detect(paste('^',gsub("[() ]", "", key),':', sep=""), regex(gsub("[() ]", "", mainContent %>% html_text()), ignore_case = TRUE))) + 1] %>% html_text())
 }
 
-manuallyStoreInmateInfo <- function(execution_number, date_of_birth, eye_color, date_of_offense, inmate_gender, hair_color, native_county, native_state, education_level, age_at_offense, inmate_occupation) {
+manuallyStoreInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level, age_at_offense) {
 	print(paste("storing manual inmate info", execution_number));
-	write.properties(file = paste("manual_inmate_info/",execution_number,".properties", sep=""), properties = list(dob = date_of_birth, eyeColor = eye_color, dateOfOffsense = date_of_offense, gender = inmate_gender, hairColor = hair_color, nativeCounty = native_county, nativeState = native_state, educationLevel = education_level, ageAtOffsence = age_at_offense, occupation = inmate_occupation), fields = c("dob", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "ageAtOffsence", "occupation"))
+	write.properties(file = paste("manual_inmate_info/",execution_number,".properties", sep=""), properties = list(dob = date_of_birth, dateReceived = date_received, eyeColor = eye_color, dateOfOffsense = date_of_offense, gender = inmate_gender, hairColor = hair_color, nativeCounty = native_county, nativeState = native_state, educationLevel = education_level, occupation = inmate_occupation), fields = c("dob", "dateReceived", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "occupation"))
 }
 
 fetchManuallyStoredInmateInfo <- function(execution_number) {
 	return(read.properties(paste("manual_inmate_info/",execution_number,".properties", sep=""), fields = NULL, encoding = "UTF-8"))
 }
 
-tryToPrefillValueForTessaractKey <- function(text, key) {
+tryToPrefillValueForTessaractKey <- function(text, key, expectedLoc) {
 	matchIdx = match(1, str_detect(regex(gsub("[\"() ~*\\?°_]", "", text$word), ignore_case = TRUE), paste("^", key, sep="")))
 	if (is.na(matchIdx) ) ( return("n/a"))
-	return(gsub("[\"() ~*?°_]", "", text$word[matchIdx + 1]))
+	return(gsub("[\"() ~*?°_]", "", text$word[matchIdx + expectedLoc]))
 }
 
 downloadInmateData <- function() {
@@ -44,6 +44,9 @@ downloadInmateData <- function() {
 	inmate_execution_dates = c()
 	inmate_races = c()
 	inmate_counties = c()
+	inmate_dobs = c()
+	inmate_received_dates = c()
+	inmate_occupations = c()
 	inmate_eye_colors = c()
 	inmate_dates_of_offense = c()
 	inmate_genders = c()
@@ -51,7 +54,6 @@ downloadInmateData <- function() {
 	inmate_native_counties = c()
 	inmate_native_states = c()
 	inmate_education_levels = c()
-	inmate_ages_at_offense = c()
 
 	insert_idx = 1
 	for(i in 2:length(allInmatesTable)) {
@@ -83,64 +85,74 @@ downloadInmateData <- function() {
 			plot(load.image(inmate_info_links[i]))
 			Sys.sleep(1)
 
+			# run tessaract
+			text <- tesseract::ocr_data(inmate_info_links[i], engine = tesseract("eng"))
+
 			# did we already label this file?
 			execution_number = inmate_execution_numbers[i]
 			if (file.exists(paste("manual_inmate_info/", execution_number, ".properties", sep=""))) {
 				currentProperties = fetchManuallyStoredInmateInfo(execution_number)
 				form <- list(
-					"Occupation:TXT" = currentProperties$occupation,
 					"DateOfBirth:TXT" = currentProperties$dob,
-					"EyeColor:TXT" = currentProperties$eyeColor,
+					"DateReceived:TXT" = tryToPrefillValueForTessaractKey(text, "Received", 1),
 					"DateOfOffense:TXT" = currentProperties$dateOfOffsense,
+					"Occupation:TXT" = currentProperties$occupation,
+					"EyeColor:TXT" = currentProperties$eyeColor,
 					"Gender:TEXT" = currentProperties$gender,
 					"HairColor:TXT" = currentProperties$hairColor,
 					"NativeCounty:TXT" = currentProperties$nativeCounty,
 					"NativeState:TXT" = currentProperties$nativeState,
-					"EducationLevel:TXT" = currentProperties$educationLevel,
-					"AgeAtOffense:NUM" = currentProperties$ageAtOffsence
+					"EducationLevel:TXT" = currentProperties$educationLevel
 				)
 				correctedData = dlg_form(form, "Is this data correct?")$res
-				manuallyStoreInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$EyeColor, correctedData$DateOfOffense, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel, correctedData$AgeAtOffense, correctedData$Occupation)
-				inmate_eye_colors[i] = correctedData$EyeColor
+				
+				manuallyStoreInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$DateReceived, correctedData$DateOfOffense, correctedData$Occupation, correctedData$EyeColor, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel)
+
+				inmate_dobs[i] = correctedData$DateOfBirth
+				inmate_received_dates[i] = correctedData$DateReceived
 				inmate_dates_of_offense[i] = correctedData$DateOfOffense
+				inmate_occupations[i] = correctedData$Occupation
+				inmate_eye_colors[i] = correctedData$EyeColor
 				inmate_genders[i] = correctedData$Gender
 				inmate_hair_colors[i] = correctedData$HairColor
 				inmate_native_counties[i] = correctedData$NativeCounty
 				inmate_native_states[i] = correctedData$NativeState
 				inmate_education_levels[i] = correctedData$EducationLevel
-				inmate_ages_at_offense[i] = correctedData$AgeAtOffense
 
 				# close the image
 				dev.off()
 				next
 			}
 
-			text <- tesseract::ocr_data(inmate_info_links[i], engine = tesseract("eng"))
+			
 
 
 			form <- list(
-				"Occupation:TXT" = tryToPrefillValueForTessaractKey(text, "Occupation"),
-				"DateOfBirth:TXT" = tryToPrefillValueForTessaractKey(text, "DOB"),
-				"EyeColor:TXT" = tryToPrefillValueForTessaractKey(text, "Eyes"),
-				"DateOfOffense:TXT" = tryToPrefillValueForTessaractKey(text, "DOB"),
+				"DateOfBirth:TXT" = tryToPrefillValueForTessaractKey(text, "DOB", 1),
+				"DateReceived:TXT" = tryToPrefillValueForTessaractKey(text, "Received", 1),
+				"DateOfOffense:TXT" = tryToPrefillValueForTessaractKey(text, "Date", 3),
+				"Occupation:TXT" = tryToPrefillValueForTessaractKey(text, "Occupation", 1),
+				"EyeColor:TXT" = tryToPrefillValueForTessaractKey(text, "Eyes", 1),
 				"Gender:TEXT" = "male",
-				"HairColor:TXT" = tryToPrefillValueForTessaractKey(text, "Hair"),
-				"NativeCounty:TXT" = tryToPrefillValueForTessaractKey(text, "County"),
-				"NativeState:TXT" = tryToPrefillValueForTessaractKey(text, "State"),
-				"EducationLevel:TXT" = tryToPrefillValueForTessaractKey(text, "Level"),
-				"AgeAtOffense:NUM" = strtoi(tryToPrefillValueForTessaractKey(text, "Offsense"))
+				"HairColor:TXT" = tryToPrefillValueForTessaractKey(text, "Hair", 1),
+				"NativeCounty:TXT" = tryToPrefillValueForTessaractKey(text, "Native", 2),
+				"NativeState:TXT" = tryToPrefillValueForTessaractKey(text, "State", 1),
+				"EducationLevel:TXT" = paste(tryToPrefillValueForTessaractKey(text, "Education", 2), "years", sep=""),
 			)
 
 			correctedData = dlg_form(form, "Is this data correct?")$res
-			manuallyStoreInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$EyeColor, correctedData$DateOfOffense, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel, correctedData$AgeAtOffense, correctedData$Occupation)
-			inmate_eye_colors[i] = correctedData$EyeColor
+			manuallyStoreInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$DateReceived, correctedData$DateOfOffense, correctedData$Occupation, correctedData$EyeColor, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel)
+			
+			inmate_dobs[i] = correctedData$DateOfBirth
+			inmate_received_dates[i] = correctedData$DateReceived
 			inmate_dates_of_offense[i] = correctedData$DateOfOffense
+			inmate_occupations[i] = correctedData$Occupation
+			inmate_eye_colors[i] = correctedData$EyeColor
 			inmate_genders[i] = correctedData$Gender
 			inmate_hair_colors[i] = correctedData$HairColor
 			inmate_native_counties[i] = correctedData$NativeCounty
 			inmate_native_states[i] = correctedData$NativeState
 			inmate_education_levels[i] = correctedData$EducationLevel
-			inmate_ages_at_offense[i] = correctedData$AgeAtOffense
 
 			# close the image
 			dev.off()
@@ -148,14 +160,16 @@ downloadInmateData <- function() {
 		}
 
 		if (grepl("no_info_available.html", inmate_info_links[i], fixed=TRUE)) {
-			inmate_eye_colors[i] = ''
-			inmate_dates_of_offense[i] = ''
-			inmate_genders[i] = ''
-			inmate_hair_colors[i] = ''
-			inmate_native_counties[i] = ''
-			inmate_native_states[i] = ''
-			inmate_education_levels[i] = ''
-			inmate_ages_at_offense[i] = 0
+			inmate_dobs[i] = 'n/a'
+			inmate_received_dates[i] = 'n/a'
+			inmate_dates_of_offense[i] = 'n/a'
+			inmate_occupations[i] = 'n/a'
+			inmate_eye_colors[i] = 'n/a'
+			inmate_genders[i] = 'n/a'
+			inmate_hair_colors[i] = 'n/a'
+			inmate_native_counties[i] = 'n/a'
+			inmate_native_states[i] = 'n/a'
+			inmate_education_levels[i] = 'n/a'
 			next
 		}
 
@@ -171,7 +185,6 @@ downloadInmateData <- function() {
 		inmate_native_counties[i] = getInfoByKey(mainContent, 'Native County')
 		inmate_native_states[i] = getInfoByKey(mainContent, 'Native State')
 		inmate_education_levels[i] = getInfoByKey(mainContent, 'EducationLevel(HighestGradeCompleted)')
-		inmate_ages_at_offense[i] = strtoi(getInfoByKey(mainContent, 'Age(atthetimeofOffense)'))
 	}
 
 	# let's get each last statement using the links stored above
@@ -228,7 +241,6 @@ downloadInmateData <- function() {
 		education_level = inmate_education_levels,
 		date_of_offense = inmate_dates_of_offense,
 		age_at_execution = inmate_ages_at_execution,
-		age_at_offsense = inmate_ages_at_offense,
 		execution_date = inmate_execution_dates,
 		race = inmate_races,
 		county = inmate_counties,
@@ -251,7 +263,6 @@ downloadInmateData <- function() {
 	comment(Inmates$education_level)<-c("Inmate's education level. n/a means unavailable")
 	comment(Inmates$date_of_offense)<-c("The date of when the final crime was commited")
 	comment(Inmates$age_at_execution)<-c("Inmate's age when executed")
-	comment(Inmates$age_at_offsense)<-c("Inmate's age when crime commited")
 	comment(Inmates$execution_date)<-c("Date of execution")	
 	comment(Inmates$race)<-c("Inmate's race")
 	comment(Inmates$county)<-c("is this the county where the crime was commited?")
