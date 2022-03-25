@@ -85,16 +85,13 @@ downloadInmateData <- function() {
 			plot(load.image(inmate_info_links[i]))
 			Sys.sleep(1)
 
-			# run tessaract
-			text <- tesseract::ocr_data(inmate_info_links[i], engine = tesseract("eng"))
-
 			# did we already label this file?
 			execution_number = inmate_execution_numbers[i]
 			if (file.exists(paste("manual_inmate_info/", execution_number, ".properties", sep=""))) {
 				currentProperties = fetchManuallyStoredInmateInfo(execution_number)
 				form <- list(
 					"DateOfBirth:TXT" = currentProperties$dob,
-					"DateReceived:TXT" = tryToPrefillValueForTessaractKey(text, "Received", 1),
+					"DateReceived:TXT" = currentProperties$dateReceived,
 					"DateOfOffense:TXT" = currentProperties$dateOfOffsense,
 					"Occupation:TXT" = currentProperties$occupation,
 					"EyeColor:TXT" = currentProperties$eyeColor,
@@ -126,9 +123,11 @@ downloadInmateData <- function() {
 
 			
 
+			# run tessaract
+			text <- tesseract::ocr_data(inmate_info_links[i], engine = tesseract("eng"))
 
 			form <- list(
-				"DateOfBirth:TXT" = tryToPrefillValueForTessaractKey(text, "DOB", 1),
+				"DateOfBirth:TXT" = tryToPrefillValueForTessaractKey(text, "Received", -1),
 				"DateReceived:TXT" = tryToPrefillValueForTessaractKey(text, "Received", 1),
 				"DateOfOffense:TXT" = tryToPrefillValueForTessaractKey(text, "Date", 3),
 				"Occupation:TXT" = tryToPrefillValueForTessaractKey(text, "Occupation", 1),
@@ -137,7 +136,7 @@ downloadInmateData <- function() {
 				"HairColor:TXT" = tryToPrefillValueForTessaractKey(text, "Hair", 1),
 				"NativeCounty:TXT" = tryToPrefillValueForTessaractKey(text, "Native", 2),
 				"NativeState:TXT" = tryToPrefillValueForTessaractKey(text, "State", 1),
-				"EducationLevel:TXT" = paste(tryToPrefillValueForTessaractKey(text, "Education", 2), "years", sep=""),
+				"EducationLevel:TXT" = paste(tryToPrefillValueForTessaractKey(text, "Education", 2), "years", sep=" ")
 			)
 
 			correctedData = dlg_form(form, "Is this data correct?")$res
