@@ -88,7 +88,7 @@ downloadInmateData <- function() {
 
 	# let's get more information on the inmate
 	for (i in 1:length(inmate_info_links)) {
-		print(paste("### fetching info:: ", inmate_info_links[i], "for inmate", inmate_execution_numbers[i]))
+		print(paste("### fetching info:: ", i, inmate_info_links[i], "for inmate", inmate_execution_numbers[i]))
 
 		# older info records are images, so we can use tesseract to get the data out
 		# and then manually fix it so that it is sane
