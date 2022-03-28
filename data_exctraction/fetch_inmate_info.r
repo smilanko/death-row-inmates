@@ -4,10 +4,11 @@ library("properties")
 library("tesseract")
 library("imager")
 library("svDialogs")
+library("rapport")
 
-storeInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level, age_at_offense) {
-	print(paste("storing manual inmate info", execution_number));
-	write.properties(file = paste("inmate_info/",execution_number,".properties", sep=""), properties = list(dob = date_of_birth, dateReceived = date_received, eyeColor = eye_color, dateOfOffsense = date_of_offense, gender = inmate_gender, hairColor = hair_color, nativeCounty = native_county, nativeState = native_state, educationLevel = education_level, occupation = inmate_occupation), fields = c("dob", "dateReceived", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "occupation"))
+storeInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level) {
+	print(paste("storing inmate info", execution_number));
+	write.properties(file = paste("inmate_info/",execution_number,".properties", sep=""), properties = list(dob = if(rapportools::is.empty(date_of_birth, trim = TRUE)) {'n/a'} else {date_of_birth}, dateReceived = if(rapportools::is.empty(date_received, trim = TRUE)) {'n/a'} else {date_received}, eyeColor = if(rapportools::is.empty(eye_color, trim = TRUE)) {'n/a'} else {eye_color}, dateOfOffsense = if(rapportools::is.empty(date_of_offense, trim = TRUE)) {'n/a'} else {date_of_offense}, gender = if(rapportools::is.empty(inmate_gender, trim = TRUE)) {'n/a'} else {inmate_gender}, hairColor = if(rapportools::is.empty(hair_color, trim = TRUE)) {'n/a'} else {hair_color}, nativeCounty = if(rapportools::is.empty(native_county, trim = TRUE)) {'n/a'} else {native_county}, nativeState = if(rapportools::is.empty(native_state, trim = TRUE)) {'n/a'} else {native_state}, educationLevel = if(rapportools::is.empty(education_level, trim = TRUE)) {'n/a'} else {education_level}, occupation = if(rapportools::is.empty(inmate_occupation, trim = TRUE)) {'n/a'} else {inmate_occupation}), fields = c("dob", "dateReceived", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "occupation"))
 }
 
 getInmateInfoFromHtmlUsingKey <- function(mainContent, key) {
@@ -32,7 +33,7 @@ downloadInmateInfo <- function() {
 
 		# when there is no info, sometimes, we get a no_info_avaiable html page.
 		if (grepl("no_info_available.html", infoLink, fixed=TRUE)) {
-			storeInmateInfo(execution_number, 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a')
+			storeInmateInfo(execution_number, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 			next
 		}
 
@@ -63,9 +64,8 @@ downloadInmateInfo <- function() {
 			next
 		}
 
-		# if we made it here, the website have us parsable html
-		# get the page using the inmate_info_link
-		# the info is in a table, wrapped in a uniquelly identifiable div
+		# if we made it here, the website gave us parsable html
+		# the info is wrapped in a uniquelly identifiable div
 		inmateInfoDoc <- read_html(infoLink)
 		mainContent = inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("table") %>% html_nodes("tr") %>% html_nodes("td")
 		storeInmateInfo(execution_number, getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Birth'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date Received'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Offense'), str_replace(inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("p") %>% html_nodes(xpath = '//p[span[text()="Prior Occupation"]]') %>% html_text(), "Prior Occupation\r\n", ""), getInmateInfoFromHtmlUsingKey(mainContent, 'Eye Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Gender'), getInmateInfoFromHtmlUsingKey(mainContent, 'Hair Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native County'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native State'), getInmateInfoFromHtmlUsingKey(mainContent, 'EducationLevel(HighestGradeCompleted)'))
