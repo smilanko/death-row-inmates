@@ -3,7 +3,7 @@ library("stringr")
 library("properties")
 
 storeExecution <- function(execution_number, info_link, last_statement_link, last_name, first_name, tdjc_number, age_at_execution, execution_date, race, offense_county) {
-	write.properties(file = paste("available_executions/",execution_number,".properties", sep=""), properties = list(infoLink = info_link, lastStatementLink = last_statement_link, lastName = last_name, firstName = first_name, tdjcNumber = tdjc_number, ageAtExecution = age_at_execution, executionDate = execution_date, race = race, offenseCounty = offense_county), fields = c("infoLink", "lastStatementLink", "lastName", "firstName", "tdjcNumber", "ageAtExecution", "executionDate", "race", "offenseCounty"))
+	write.properties(file = paste("available_executions/",execution_number,".properties", sep=""), properties = list(infoLink = info_link, lastStatementLink = last_statement_link, lastName = last_name, firstName = first_name, tdjcNumber = tdjc_number, ageAtExecution = age_at_execution, executionDate = execution_date, race = race, offenseCounty = offense_county, executionNumber = execution_number), fields = c("infoLink", "lastStatementLink", "lastName", "firstName", "tdjcNumber", "ageAtExecution", "executionDate", "race", "offenseCounty", "executionNumber"))
 }
 
 fetchAvailableExecutions <- function() {
