@@ -6,7 +6,7 @@ storeExecution <- function(execution_number, info_link, last_statement_link, las
 	write.properties(file = paste("available_executions/",execution_number,".properties", sep=""), properties = list(infoLink = info_link, lastStatementLink = last_statement_link, lastName = last_name, firstName = first_name, tdjcNumber = tdjc_number, ageAtExecution = age_at_execution, executionDate = execution_date, race = race, offenseCounty = offense_county), fields = c("infoLink", "lastStatementLink", "lastName", "firstName", "tdjcNumber", "ageAtExecution", "executionDate", "race", "offenseCounty"))
 }
 
-fetchAvailableInmates <- function() {
+fetchAvailableExecutions <- function() {
 	# constants
 	baseUrl = "https://www.tdcj.texas.gov/death_row/"
 	print(paste("fetching available inmates from", baseUrl))
