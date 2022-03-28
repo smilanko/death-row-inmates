@@ -15,6 +15,25 @@ getInmateInfoFromHtmlUsingKey <- function(mainContent, key) {
 	return(mainContent[match(1, str_detect(paste('^',gsub("[() ]", "", key),':', sep=""), regex(gsub("[() ]", "", mainContent %>% html_text()), ignore_case = TRUE))) + 1] %>% html_text())
 }
 
+removeWeirdCharactersFromHumanText <- function(data) {
+	return(gsub("[\"() ~*?°_]", "", data))
+}
+
+tryToPrefillValueForTessaractKey <- function(text, key, expectedLoc, isDate) {
+	matchIdx = match(1, str_detect(regex(gsub("[\"() ~*\\?°_]", "", text$word), ignore_case = TRUE), paste("^", key, sep="")))
+	if (is.na(matchIdx) ) ( return("n/a"))
+	sanatizedString = removeWeirdCharactersFromHumanText(text$word[matchIdx + expectedLoc])
+	if (length(sanatizedString) > 3 || isFALSE(isDate)) { return(sanatizedString) }
+	# let's try to build the date, as it's chunked out
+	startIdx = if (expectedLoc < 0) -2 else 1
+	parsedDate = ''
+	for (i in 1:2) {
+		parsedDate = paste(parsedDate, removeWeirdCharactersFromHumanText(text$word[matchIdx + (expectedLoc + startIdx)]), sep="")
+		startIdx = startIdx + 1
+	}
+	return(str_extract(if (expectedLoc < 0) paste(parsedDate, sanatizedString, sep="") else paste(sanatizedString, parsedDate, sep=""), '[0-9]{2}/[0-9]{2}/[0-9]{2}'))
+}
+
 downloadInmateInfo <- function() {
 	# let's see what executions we already stored
 	executions = list.files(path="available_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
