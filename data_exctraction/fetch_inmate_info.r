@@ -5,6 +5,11 @@ library("tesseract")
 library("imager")
 library("svDialogs")
 
+storeInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level, age_at_offense) {
+	print(paste("storing manual inmate info", execution_number));
+	write.properties(file = paste("inmate_info/",execution_number,".properties", sep=""), properties = list(dob = date_of_birth, dateReceived = date_received, eyeColor = eye_color, dateOfOffsense = date_of_offense, gender = inmate_gender, hairColor = hair_color, nativeCounty = native_county, nativeState = native_state, educationLevel = education_level, occupation = inmate_occupation), fields = c("dob", "dateReceived", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "occupation"))
+}
+
 getInmateInfoFromHtmlUsingKey <- function(mainContent, key) {
 	return(mainContent[match(1, str_detect(paste('^',gsub("[() ]", "", key),':', sep=""), regex(gsub("[() ]", "", mainContent %>% html_text()), ignore_case = TRUE))) + 1] %>% html_text())
 }
@@ -21,13 +26,13 @@ downloadInmateInfo <- function() {
 		execution_number = downloadedExecution$executionNumber
 
 		# if we already fetched this file, we can move on
-		if (file.exists(paste("manual_inmate_info/", execution_number, ".properties", sep=""))) {
+		if (file.exists(paste("inmate_info/", execution_number, ".properties", sep=""))) {
 			next
 		}
 
 		# when there is no info, sometimes, we get a no_info_avaiable html page.
 		if (grepl("no_info_available.html", infoLink, fixed=TRUE)) {
-			manuallyStoreInmateInfo(execution_number, 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a')
+			storeInmateInfo(execution_number, 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a')
 			next
 		}
 
@@ -53,7 +58,7 @@ downloadInmateInfo <- function() {
 			)
 
 			correctedData = dlg_form(form, "Is this data correct?")$res
-			manuallyStoreInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$DateReceived, correctedData$DateOfOffense, correctedData$Occupation, correctedData$EyeColor, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel)
+			storeInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$DateReceived, correctedData$DateOfOffense, correctedData$Occupation, correctedData$EyeColor, correctedData$Gender, correctedData$HairColor, correctedData$NativeCounty, correctedData$NativeState, correctedData$EducationLevel)
 			dev.off() # close the image
 			next
 		}
@@ -63,6 +68,6 @@ downloadInmateInfo <- function() {
 		# the info is in a table, wrapped in a uniquelly identifiable div
 		inmateInfoDoc <- read_html(infoLink)
 		mainContent = inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("table") %>% html_nodes("tr") %>% html_nodes("td")
-		manuallyStoreInmateInfo(execution_number, getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Birth'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date Received'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Offense'), str_replace(inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("p") %>% html_nodes(xpath = '//p[span[text()="Prior Occupation"]]') %>% html_text(), "Prior Occupation\r\n", ""), getInfoByKey(mainContent, 'Eye Color'), getInfoByKey(mainContent, 'Gender'), getInfoByKey(mainContent, 'Hair Color'), getInfoByKey(mainContent, 'Native County'), getInfoByKey(mainContent, 'Native State'), getInfoByKey(mainContent, 'EducationLevel(HighestGradeCompleted)'))
+		storeInmateInfo(execution_number, getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Birth'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date Received'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Offense'), str_replace(inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("p") %>% html_nodes(xpath = '//p[span[text()="Prior Occupation"]]') %>% html_text(), "Prior Occupation\r\n", ""), getInmateInfoFromHtmlUsingKey(mainContent, 'Eye Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Gender'), getInmateInfoFromHtmlUsingKey(mainContent, 'Hair Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native County'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native State'), getInmateInfoFromHtmlUsingKey(mainContent, 'EducationLevel(HighestGradeCompleted)'))
 	}
 }
