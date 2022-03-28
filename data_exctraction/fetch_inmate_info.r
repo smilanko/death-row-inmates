@@ -3,7 +3,6 @@ library("stringr")
 library("properties")
 library("tesseract")
 library("imager")
-library("svDialogs")
 library("rapport")
 
 storeInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level) {
