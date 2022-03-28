@@ -6,7 +6,6 @@ library("imager")
 library("rapport")
 
 storeInmateInfo <- function(execution_number, date_of_birth, date_received, date_of_offense, inmate_occupation, eye_color, inmate_gender, hair_color, native_county, native_state, education_level) {
-	print(paste("storing inmate info", execution_number));
 	write.properties(file = paste("inmate_info/",execution_number,".properties", sep=""), properties = list(dob = if(rapportools::is.empty(date_of_birth, trim = TRUE)) {'n/a'} else {date_of_birth}, dateReceived = if(rapportools::is.empty(date_received, trim = TRUE)) {'n/a'} else {date_received}, eyeColor = if(rapportools::is.empty(eye_color, trim = TRUE)) {'n/a'} else {eye_color}, dateOfOffsense = if(rapportools::is.empty(date_of_offense, trim = TRUE)) {'n/a'} else {date_of_offense}, gender = if(rapportools::is.empty(inmate_gender, trim = TRUE)) {'n/a'} else {inmate_gender}, hairColor = if(rapportools::is.empty(hair_color, trim = TRUE)) {'n/a'} else {hair_color}, nativeCounty = if(rapportools::is.empty(native_county, trim = TRUE)) {'n/a'} else {native_county}, nativeState = if(rapportools::is.empty(native_state, trim = TRUE)) {'n/a'} else {native_state}, educationLevel = if(rapportools::is.empty(education_level, trim = TRUE)) {'n/a'} else {education_level}, occupation = if(rapportools::is.empty(inmate_occupation, trim = TRUE)) {'n/a'} else {inmate_occupation}), fields = c("dob", "dateReceived", "eyeColor", "dateOfOffsense", "gender", "hairColor", "nativeCounty", "nativeState", "educationLevel", "occupation"))
 }
 
@@ -44,11 +43,6 @@ downloadInmateInfo <- function() {
 		infoLink = downloadedExecution$infoLink
 		execution_number = downloadedExecution$executionNumber
 
-		# if we already fetched this file, we can move on
-		if (file.exists(paste("inmate_info/", execution_number, ".properties", sep=""))) {
-			next
-		}
-
 		# when there is no info, sometimes, we get a no_info_avaiable html page.
 		if (grepl("no_info_available.html", infoLink, fixed=TRUE)) {
 			storeInmateInfo(execution_number, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
@@ -58,6 +52,11 @@ downloadInmateInfo <- function() {
 		# older info records are images, so we can use tesseract to help with data retrieval
 		if (!grepl(".html", infoLink, fixed=TRUE) ) {
 			
+			# if we already fetched this image, we can move on
+			if (file.exists(paste("inmate_info/", execution_number, ".properties", sep=""))) {
+				next
+			}
+
 			# display the image, and run tessaract. give it some time to finish the task
 			plot(load.image(infoLink))
 			Sys.sleep(1)
