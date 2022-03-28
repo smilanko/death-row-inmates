@@ -35,12 +35,12 @@ tryToPrefillValueForTessaractKey <- function(text, key, expectedLoc, isDate) {
 
 downloadInmateInfo <- function() {
 	# let's see what executions we already stored
-	executions = list.files(path="available_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
+	executions = list.files(path="inmate_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
 	print(paste("we loaded", length(executions), "executions"))
 
 	# let's get the links for each one
 	for (i in 1:length(executions)) {
-		downloadedExecution = read.properties(paste("available_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
+		downloadedExecution = read.properties(paste("inmate_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
 		infoLink = downloadedExecution$infoLink
 		execution_number = downloadedExecution$executionNumber
 

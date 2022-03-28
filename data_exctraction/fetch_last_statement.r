@@ -6,18 +6,17 @@ library("imager")
 library("rapport")
 
 storeInmateLastStatement <- function(execution_number, stmt) {
-	print(paste("storing inmate last statement", execution_number));
 	write.properties(file = paste("inmate_last_statement/",execution_number,".properties", sep=""), properties = list(stmt = if(rapportools::is.empty(stmt, trim = TRUE)) {'No statement was made'} else {date_of_birth}, fields = c("stmt")))
 }
 
 downloadInmateLastStatement <- function() {
 	# let's see what executions we already stored
-	executions = list.files(path="available_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
+	executions = list.files(path="inmate_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
 	print(paste("we loaded", length(executions), "executions"))
 
 	# let's get the links for each one
 	for (i in 1:length(executions)) {
-		downloadedExecution = read.properties(paste("available_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
+		downloadedExecution = read.properties(paste("inmate_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
 		last_stmt_link = downloadedExecution$lastStatementLink
 		execution_number = downloadedExecution$executionNumber
 
