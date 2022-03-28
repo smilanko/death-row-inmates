@@ -36,7 +36,7 @@ tryToPrefillValueForTessaractKey <- function(text, key, expectedLoc, isDate) {
 downloadInmateInfo <- function() {
 	# let's see what executions we already stored
 	executions = list.files(path="inmate_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
-	print(paste("we loaded", length(executions), "executions"))
+	print(paste("parsing through", length(executions), "executions to download the inmate info 🥳"))
 
 	# let's get the links for each one
 	for (i in 1:length(executions)) {
@@ -88,4 +88,5 @@ downloadInmateInfo <- function() {
 		mainContent = inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("table") %>% html_nodes("tr") %>% html_nodes("td")
 		storeInmateInfo(execution_number, getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Birth'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date Received'), getInmateInfoFromHtmlUsingKey(mainContent, 'Date of Offense'), str_replace(inmateInfoDoc %>% html_nodes(xpath = '//div[@id="content_right"]') %>% html_nodes("p") %>% html_nodes(xpath = '//p[span[text()="Prior Occupation"]]') %>% html_text(), "Prior Occupation\r\n", ""), getInmateInfoFromHtmlUsingKey(mainContent, 'Eye Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Gender'), getInmateInfoFromHtmlUsingKey(mainContent, 'Hair Color'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native County'), getInmateInfoFromHtmlUsingKey(mainContent, 'Native State'), getInmateInfoFromHtmlUsingKey(mainContent, 'EducationLevel(HighestGradeCompleted)'))
 	}
+	print("hooray! 🎉 we downloaded inmate infos")
 }
