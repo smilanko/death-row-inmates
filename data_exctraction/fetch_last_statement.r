@@ -1,18 +1,19 @@
 library("rvest")
 library("stringr")
-library("properties")
 library("tesseract")
 library("imager")
 library("rapport")
 
 storeInmateLastStatement <- function(execution_number, stmt) {
-	write.properties(file = paste("inmate_last_statement/",execution_number,".properties", sep=""), properties = list(stmt = if(rapportools::is.empty(stmt, trim = TRUE)) {'No statement was made'} else {date_of_birth}, fields = c("stmt")))
+	fileConn<-file(paste("inmate_last_statement/",execution_number, sep=""))
+	writeLines(if(rapportools::is.empty(stmt, trim = TRUE)) {'No statement was made'} else {stmt}, fileConn)
+	close(fileConn)
 }
 
 downloadInmateLastStatement <- function() {
 	# let's see what executions we already stored
 	executions = list.files(path="inmate_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
-	print(paste("we loaded", length(executions), "executions"))
+	print(paste("parsing through", length(executions), "executions to download the last statements 🥳"))
 
 	# let's get the links for each one
 	for (i in 1:length(executions)) {
@@ -21,7 +22,7 @@ downloadInmateLastStatement <- function() {
 		execution_number = downloadedExecution$executionNumber
 
 		# if we already fetched this file, we can move on
-		if (file.exists(paste("inmate_last_statement/", execution_number, ".properties", sep=""))) {
+		if (file.exists(paste("inmate_last_statement/", execution_number, sep=""))) {
 			next
 		}
 
@@ -54,6 +55,7 @@ downloadInmateLastStatement <- function() {
 			}
 		}
 		storeInmateLastStatement(execution_number, inmatesComment)
-
 	}
+
+	print("hooray! 🎉 we downloaded last statements")
 }
