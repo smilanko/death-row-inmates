@@ -6,7 +6,7 @@ library("rapport")
 
 storeInmateLastStatement <- function(execution_number, stmt) {
 	fileConn<-file(paste("inmate_last_statement/",execution_number, sep=""))
-	writeLines(if(rapportools::is.empty(stmt, trim = TRUE)) {'No statement was made'} else {stmt}, fileConn)
+	writeLines(stmt, fileConn)
 	close(fileConn)
 }
 
@@ -54,6 +54,11 @@ downloadInmateLastStatement <- function() {
 				inmatesComment = paste(inmatesComment, potentialStmt)
 			}
 		}
+
+		# sometimes, the built comment is that the inmate has no comment
+		# so we can remove this
+		if (nchar(inmatesComment) < 10 && grepl("none", inmatesComment, ignore.case = TRUE)) { inmatesComment = '' }
+		if (grepl("This inmate declined to make a last statement", inmatesComment, ignore.case = TRUE)) { inmatesComment = '' }
 		storeInmateLastStatement(execution_number, inmatesComment)
 	}
 
