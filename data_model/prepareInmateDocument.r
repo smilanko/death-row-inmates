@@ -3,6 +3,29 @@ library("rvest")
 library("stringr")
 library("rapport")
 
+cleanupLastStatement <- function(stmt) {
+	# remove multi space
+	stmt = str_replace_all(stmt, " +", " ")
+	# remove forward slashes
+	stmt = str_replace_all(stmt, "///", "")
+	# remove back slashes
+	stmt = str_replace_all(stmt, "\\\\", "")
+	# remove quotes
+	stmt = str_replace_all(stmt, "\"", "")
+	# remove new lines
+	stmt = str_replace_all(stmt, "[\r\n]" , "")
+	# remove beggining and ending whitespace
+	return(rapportools::trim.space(stmt))
+}
+
+cleanupOccupation <- function(occupation) {
+	# trim space and remove muli space
+	occupation = rapportools::trim.space(str_replace_all(occupation, " +", " "))
+	# remove all forward slashes, except in n/a
+	if (occupation != 'n/a') { occupation = str_replace_all(occupation, "/", ",")}
+	return(occupation)
+}
+
 prepareInmateDocument <- function() {
 	# let's see what executions we already stored
 	executions = list.files(path="../data_extraction/inmate_executions/", pattern=NULL, all.files=FALSE, full.names=FALSE)
@@ -30,18 +53,7 @@ prepareInmateDocument <- function() {
 		inmateInfo = read.properties(paste("../data_extraction/inmate_info/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
 		lastStatement = readLines(paste("../data_extraction/inmate_last_statement/", downloadedExecution$executionNumber, sep=""))
 
-		# remove multi space
-		lastStatement = str_replace_all(lastStatement, " +", " ")
-		# remove forward slashes
-		lastStatement = str_replace_all(lastStatement, "///", "")
-		# remove back slashes
-		lastStatement = str_replace_all(lastStatement, "\\\\", "")
-		# remove quotes
-		lastStatement = str_replace_all(lastStatement, "\"", "")
-		# remove new lines
-		lastStatement = str_replace_all(lastStatement, "[\r\n]" , "")
-		# remove beggining and ending whitespace
-		lastStatement = rapportools::trim.space(lastStatement)
+
 
 		inmate_execution_number[i] = downloadedExecution$executionNumber
 		inmate_first_names[i] = downloadedExecution$firstName
@@ -57,8 +69,8 @@ prepareInmateDocument <- function() {
 		inmate_native_counties[i] = tolower(inmateInfo$nativeCounty)
 		inmate_native_states[i] = tolower(inmateInfo$nativeState)
 		inmate_education_levels[i] = rapportools::trim.space(str_replace_all(tolower(inmateInfo$educationLevel), " +", " "))
-		inmate_occupations[i] = rapportools::trim.space(str_replace_all(tolower(inmateInfo$occupation), " +", " "))
-		inmate_last_statements[i] = lastStatement
+		inmate_occupations[i] = cleanupOccupation(tolower(inmateInfo$occupation))
+		inmate_last_statements[i] = cleanupLastStatement(lastStatement)
 	}
 
 	# prepare a dataframe
