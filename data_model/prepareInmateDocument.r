@@ -56,7 +56,7 @@ prepareInmateDocument <- function() {
 		inmate_hair_colors[i] = tolower(inmateInfo$hairColor)
 		inmate_native_counties[i] = tolower(inmateInfo$nativeCounty)
 		inmate_native_states[i] = tolower(inmateInfo$nativeState)
-		inmate_education_levels[i] = tolower(inmateInfo$educationLevel)
+		inmate_education_levels[i] = rapportools::trim.space(str_replace_all(tolower(inmateInfo$educationLevel), " +", " "))
 		inmate_occupations[i] = tolower(inmateInfo$occupation)
 		inmate_last_statements[i] = lastStatement
 	}
