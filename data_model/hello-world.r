@@ -13,7 +13,8 @@ levels(factor(Inmates$hair_color))
 levels(factor(Inmates$race))
 levels(factor(Inmates$native_county))
 levels(factor(Inmates$native_state))
+levels(factor(Inmates$education_level))
 
 # dan is here, making more checks
-levels(factor(Inmates$education_level))
+
 levels(factor(Inmates$occupation))
