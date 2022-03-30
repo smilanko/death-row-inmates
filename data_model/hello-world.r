@@ -6,7 +6,14 @@ source("prepareInmateDocument.r")
 # load the inmage
 Inmates = prepareInmateDocument()
 
-# do something fun
+# data checks
 levels(factor(Inmates$gender))
 levels(factor(Inmates$eye_color))
 levels(factor(Inmates$hair_color))
+levels(factor(Inmates$race))
+levels(factor(Inmates$native_county))
+levels(factor(Inmates$native_state))
+
+# dan is here, making more checks
+levels(factor(Inmates$education_level))
+levels(factor(Inmates$occupation))
