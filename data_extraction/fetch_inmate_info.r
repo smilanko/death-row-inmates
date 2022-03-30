@@ -72,7 +72,7 @@ downloadInmateInfo <- function() {
 				"HairColor:TXT" = tryToPrefillValueForTessaractKey(text, "Hair", 1, FALSE),
 				"NativeCounty:TXT" = tryToPrefillValueForTessaractKey(text, "Native", 2, FALSE),
 				"NativeState:TXT" = tryToPrefillValueForTessaractKey(text, "State", 1, FALSE),
-				"EducationLevel:TXT" = paste(tryToPrefillValueForTessaractKey(text, "Education", 2, FALSE), "years", sep=" ")
+				"EducationLevel:TXT" = tryToPrefillValueForTessaractKey(text, "Education", 2, FALSE)
 			)
 
 			correctedData = dlg_form(form, "Is this data correct?")$res
