@@ -47,17 +47,17 @@ prepareInmateDocument <- function() {
 		inmate_first_names[i] = downloadedExecution$firstName
 		inmate_last_names[i] = downloadedExecution$lastName
 		inmate_execution_dates[i] = downloadedExecution$executionDate
-		inmate_races[i] = downloadedExecution$race
+		inmate_races[i] = tolower(downloadedExecution$race)
 		inmate_dates_of_birth[i] = inmateInfo$dob
 		inmate_dates_received[i] = inmateInfo$dateReceived
-		inmate_eye_colors[i] = inmateInfo$eyeColor
+		inmate_eye_colors[i] = tolower(inmateInfo$eyeColor)
 		inmate_dates_of_offense[i] = inmateInfo$dateOfOffsense
-		inmate_genders[i] = inmateInfo$gender
-		inmate_hair_colors[i] = inmateInfo$hairColor
-		inmate_native_counties[i] = inmateInfo$nativeCounty
-		inmate_native_states[i] = inmateInfo$nativeState
-		inmate_education_levels[i] = inmateInfo$educationLevel
-		inmate_occupations[i] = inmateInfo$occupation
+		inmate_genders[i] = tolower(inmateInfo$gender)
+		inmate_hair_colors[i] = tolower(inmateInfo$hairColor)
+		inmate_native_counties[i] = tolower(inmateInfo$nativeCounty)
+		inmate_native_states[i] = tolower(inmateInfo$nativeState)
+		inmate_education_levels[i] = tolower(inmateInfo$educationLevel)
+		inmate_occupations[i] = tolower(inmateInfo$occupation)
 		inmate_last_statements[i] = lastStatement
 	}
 
