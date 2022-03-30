@@ -3,6 +3,7 @@ library("stringr")
 library("tesseract")
 library("imager")
 library("rapport")
+library("properties")
 
 storeInmateLastStatement <- function(execution_number, stmt) {
 	fileConn<-file(paste("inmate_last_statement/",execution_number, sep=""))
