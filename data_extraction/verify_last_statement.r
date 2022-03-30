@@ -16,7 +16,7 @@ verifyLastStatement <- function() {
 		downloadedExecution = read.properties(paste("inmate_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
 		lastStatementLink = downloadedExecution$lastStatementLink
 		execution_number = downloadedExecution$executionNumber
-		print(paste(i, lastStatementLink, execution_number))
+		print(paste(lastStatementLink, execution_number))
 
 		# if we already fetched this file, we can verify it
 		if (!file.exists(paste("inmate_last_statement/", execution_number, sep=""))) {

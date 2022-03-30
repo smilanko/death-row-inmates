@@ -20,7 +20,7 @@ verifyInmateInfo <- function() {
 		downloadedExecution = read.properties(paste("inmate_executions/", executions[i], sep=""), fields = NULL, encoding = "UTF-8")
 		infoLink = downloadedExecution$infoLink
 		execution_number = downloadedExecution$executionNumber
-		print(paste(i, infoLink, execution_number))
+		print(paste(infoLink, execution_number))
 
 		# if we already fetched this file, we can verify it
 		if (!file.exists(paste("inmate_info/", execution_number, ".properties", sep=""))) {
