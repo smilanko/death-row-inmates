@@ -25,6 +25,22 @@ showDataLevels <- function(Inmates) {
 	levels(factor(unique_occupations))
 }
 
+showDaysInJail <- function(Inmates) {
+	for (i in 1:nrow(Inmates)) {
+		days_in_jail = difftime(as.Date(Inmates$date_received[i], format = "%m/%d/%Y"), as.Date(Inmates$execution_date[i], format = "%m/%d/%Y"), units = "days")
+		annoying_1 = as.Date(Inmates$date_received[i], format = "%m/%d/%Y")
+		annoying_2 = as.Date(Inmates$execution_date[i], format = "%m/%d/%Y")
+		print(paste(Inmates$execution_number[i], annoying_1, annoying_2, days_in_jail))
+
+		if (is.na(days_in_jail)) { next }
+		
+		if (days_in_jail > 0) {
+			print(paste("execution ", Inmates$execution_number[i], "might have the execution dates wrong"))
+			quit(-1)
+		}
+	}
+}
+
 # load the inmates
 Inmates = prepareInmateDocument()
-showDataLevels(Inmates)
+showDaysInJail(Inmates)
