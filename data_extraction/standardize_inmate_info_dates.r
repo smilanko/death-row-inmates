@@ -40,16 +40,8 @@ standardizeDates <- function() {
 
 		# load the stored data
 		currentProperties = fetchStoredInmateInfo(execution_number)
-		print(paste(currentProperties$dob, currentProperties$dateReceived, currentProperties$dateOfOffsense))
-
-		form <- list(
-			"DateOfBirth:TXT" = fixDate(currentProperties$dob),
-			"DateReceived:TXT" = fixDate(currentProperties$dateReceived),
-			"DateOfOffense:TXT" = fixDate(currentProperties$dateOfOffsense)
-		)
-		correctedData = dlg_form(form, paste("Does the website data reflect details for execution", executions[i]))$res
-		storeInmateInfo(execution_number, correctedData$DateOfBirth, correctedData$DateReceived, correctedData$DateOfOffense, currentProperties$occupation, currentProperties$eyeColor, currentProperties$gender, currentProperties$hairColor, currentProperties$nativeCounty, currentProperties$nativeState, currentProperties$educationLevel)
+		storeInmateInfo(execution_number, fixDate(currentProperties$dob), fixDate(currentProperties$dateReceived), fixDate(currentProperties$dateOfOffsense), currentProperties$occupation, currentProperties$eyeColor, currentProperties$gender, currentProperties$hairColor, currentProperties$nativeCounty, currentProperties$nativeState, currentProperties$educationLevel)
 
 	}
-	print("hooray! 🎉 we verified dates")
+	print("hooray! 🎉 we fixed the dates")
 }
