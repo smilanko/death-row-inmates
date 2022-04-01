@@ -23,7 +23,7 @@ dtm <- dtm[rowTotals> 2, ] # get documents with at least 2 ter,s
 spokenWords = rowSums(as.matrix(dtm))
 
 # how long is the inmate in jail
-days_in_jail = difftime(as.Date(Inmates$date_received, format = "%m/%d/%y"), as.Date(Inmates$execution_date, format = "%m/%d/%y"), units = "days")
+days_in_jail = difftime(as.Date(Inmates$date_received, format = "%m/%d/%Y"), as.Date(Inmates$execution_date, format = "%m/%d/%Y"), units = "days")
 hist(as.numeric(days_in_jail), prob = TRUE)
 
 
