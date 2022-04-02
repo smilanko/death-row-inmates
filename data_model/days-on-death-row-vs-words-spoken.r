@@ -38,7 +38,7 @@ extractAnswer <- function(Inmates) {
 
 	m1 = lm(spokenWords~days_in_jail)
 	setEPS()
-	postscript("plots/days_in_jail_vs_words_spoken/linear_model.eps",width=12.5,height=4)
+	postscript("plots/days-on-death-row-vs-words-spoken/linear_model.eps",width=12.5,height=4)
 	par(mfrow=c(1,4))
 	plot(m1)
 	dev.off()
@@ -46,8 +46,8 @@ extractAnswer <- function(Inmates) {
 
 	# coorelation plot
 	setEPS()
-	postscript("plots/days_in_jail_vs_words_spoken/variable_correlation.eps")	
-    pairs.panels(data.frame(days_in_jail, spokenWords), labels =c('Days in jail', 'log(Spoken Words)'), smooth = TRUE, scale = FALSE, density = TRUE, ellipses = TRUE,  method = "pearson",  pch = 21, lm = FALSE, cor = TRUE, jiggle = FALSE, factor = 2,  hist.col = 4, stars = TRUE,  ci = TRUE)
+	postscript("plots/days-on-death-row-vs-words-spoken/variable_correlation.eps")	
+    pairs.panels(data.frame(days_in_jail, spokenWords), labels =c('Days on Death Row', 'log(Spoken Words)'), smooth = TRUE, scale = FALSE, density = TRUE, ellipses = TRUE,  method = "pearson",  pch = 21, lm = FALSE, cor = TRUE, jiggle = FALSE, factor = 2,  hist.col = 4, stars = TRUE,  ci = TRUE)
     dev.off()
 }
 
