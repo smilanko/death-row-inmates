@@ -2,6 +2,7 @@ library("dplyr")
 library("rapport")
 library("tm")
 library("data.table") 
+library("psych")
 source("prepareInmateDocument.r")
 
 # silence the warning, since this script is verified
@@ -33,26 +34,21 @@ extractAnswer <- function(Inmates) {
 	# we do not want data that has no days in fail over over 19 years
 	jail_sentance_filter = which(is.na(days_in_jail) | (days_in_jail < -7000))
 	spokenWords = spokenWords[-jail_sentance_filter]
-	# qq norm plot of spokenWords
-	par(mfrow=c(2,2))
-	qqnorm(spokenWords, pch = 1, frame = FALSE)
-	qqline(spokenWords, col = "steelblue", lwd = 2)
-	hist(spokenWords, prob = TRUE)
-	lines(density(spokenWords), col = 4, lwd = 2)
-
 	days_in_jail = as.numeric(days_in_jail[-jail_sentance_filter])
-	qqnorm(days_in_jail, pch = 1, frame = FALSE)
-	qqline(days_in_jail, col = "steelblue", lwd = 2)
-	hist(days_in_jail, prob = TRUE)
-	lines(density(days_in_jail), col = 4, lwd = 2)
 
 	m1 = lm(spokenWords~days_in_jail)
-	dev.off()
-	par(mfrow=c(1,5))
-	plot(days_in_jail, spokenWords)
-	abline(lm(spokenWords~days_in_jail), col = "red", lwd = 3)
+	setEPS()
+	postscript("plots/days_in_jail_vs_words_spoken/linear_model.eps",width=12.5,height=4)
+	par(mfrow=c(1,4))
 	plot(m1)
+	dev.off()
 	print(summary(m1))
+
+	# coorelation plot
+	setEPS()
+	postscript("plots/days_in_jail_vs_words_spoken/variable_correlation.eps")	
+    pairs.panels(data.frame(days_in_jail, spokenWords), labels =c('Days in jail', 'log(Spoken Words)'), smooth = TRUE, scale = FALSE, density = TRUE, ellipses = TRUE,  method = "pearson",  pch = 21, lm = FALSE, cor = TRUE, jiggle = FALSE, factor = 2,  hist.col = 4, stars = TRUE,  ci = TRUE)
+    dev.off()
 }
 
 # load the inmates
