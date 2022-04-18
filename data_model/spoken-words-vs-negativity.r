@@ -52,10 +52,11 @@ extractAnswer <- function(Inmates) {
 	mydata$sentiments <- factor(mydata$sentiments)
 	print(table(mydata$sentiments))
 
-	ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
+	ind <- sample(2, nrow(mydata), replace = T, prob = c(0.7, 0.3))
 	train <- mydata[ind == 1,]
 	test <- mydata[ind == 2,]
 	m <- glm(sentiments~., data = train, family = 'binomial' )
+	print(summary(m))
 
 	setEPS()
 	postscript("plots/spoken-words-vs-negativity/spoken_words_negativity_corr.eps",width=5,height=4)
@@ -65,17 +66,31 @@ extractAnswer <- function(Inmates) {
 	dev.off()
 
 	setEPS()
-	postscript("plots/spoken-words-vs-negativity/roc_spoken_words_negativity.eps",width=5,height=4)
+	postscript("plots/spoken-words-vs-negativity/roc_spoken_words_negativity.eps",width=10,height=4)
 	p1 <- predict(m, train, type = 'response')
-	print(table(Predicted = ifelse(p1 > 0.71, 0, 1), Actual = train$sentiments))
-	r <- multiclass.roc(train$sentiments, p1, percent = TRUE)
-	roc <- r[['rocs']]
-	r1 <- roc[[1]]
-	plot.roc(r1, col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
+	p2 <- predict(m, test, type = 'response')
+
+	par(mfrow=c(1,2))
+	r_one <- multiclass.roc(train$sentiments, p1, percent = TRUE)
+	roc_one <- r_one[['rocs']]
+	r1 <- roc_one[[1]]
+	plot.roc(r1, main = 'ROC Curve for Train Data', col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
 	auc(r1)
 	coords(r1, "best", ret="threshold", transpose = FALSE)
+
+	r_two <- multiclass.roc(test$sentiments, p2, percent = TRUE)
+	roc_two <- r_two[['rocs']]
+	r2 <- roc_two[[1]]
+	plot.roc(r2, main = 'ROC Curve for Test Data', col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
+	auc(r2)
+	coords(r2, "best", ret="threshold", transpose = FALSE)
 	dev.off()
 
+	pval = 0.706
+	print("### Test confusion matrix")
+	print(table(Predicted = ifelse(p2 > pval, 1, 0), Actual = test$sentiments))
+	print("### Train confusion matrix")
+	print(table(Predicted = ifelse(p1 > pval, 1,0), Actual = train$sentiments))
 }
 
 # load the inmates
