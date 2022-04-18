@@ -12,6 +12,10 @@ extractAnswer <- function(Inmates) {
 	# set the seed for reproducability
 	set.seed(3)
 
+	# check if we have any empty statements
+	empty_last_statement_filter = which(Inmates$last_statement == "")
+	Inmates <- Inmates[-empty_last_statement_filter, ]
+
 	# do some transformations on the text
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
@@ -31,7 +35,7 @@ extractAnswer <- function(Inmates) {
 	# apply the same filter to remove inmates with little words
 	days_in_jail = days_in_jail[document_count_filter]
 
-	# we do not want data that has no days in fail over over 19 years
+	# we do not want data that has no days in jail over 19 years
 	jail_sentance_filter = which(is.na(days_in_jail) | (days_in_jail < -7000))
 	spokenWords = spokenWords[-jail_sentance_filter]
 	days_in_jail = as.numeric(days_in_jail[-jail_sentance_filter])

@@ -19,6 +19,9 @@ library("nnet")
 library("e1071")
 source("prepareInmateDocument.r")
 
+# silence the warning, since this script is verified
+options(warn=-1)
+
 extractAnswer <- function(Inmates) {
 	# check if we have any empty statements
 	empty_last_statement_filter = which(Inmates$last_statement == "")
@@ -70,3 +73,4 @@ extractAnswer <- function(Inmates) {
 # load the inmates
 Inmates = prepareInmateDocument()
 extractAnswer(Inmates)
+print("we've answered the question!! take a look at the model! 🤞")
