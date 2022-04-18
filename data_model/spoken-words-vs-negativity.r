@@ -27,37 +27,45 @@ extractAnswer <- function(Inmates) {
 	empty_last_statement_filter = which(Inmates$last_statement == "")
 	Inmates <- Inmates[-empty_last_statement_filter, ]
 
-	# how long is the inmate in jail
-	days_in_jail = difftime(as.Date(Inmates$date_received, format = "%m/%d/%Y"), as.Date(Inmates$execution_date, format = "%m/%d/%Y"), units = "days")
-	
-	# we do not want data that has no days in jail over 19 years
-	jail_sentance_filter = which(is.na(days_in_jail) | (days_in_jail < -7000))
-	statements = Inmates$last_statement[-jail_sentance_filter]
-	days_in_jail = as.numeric(days_in_jail[-jail_sentance_filter])
+	# do some transformations on the text
+	documents <- Corpus(VectorSource(Inmates$last_statement))
+	documents = tm_map(documents, content_transformer(tolower))
+	documents = tm_map(documents, removePunctuation)
+	documents = tm_map(documents, removeWords, stopwords("english"))
+	documents <- tm_map(documents, stripWhitespace)
 
+	# create a document term matrix
+	dtm <- DocumentTermMatrix(documents)
+	rowTotals <- apply(dtm , 1, sum) # Find the sum of words in each Document
+	document_count_filter = rowTotals> 2 # get documents with at least 2 words
+	dtm <- dtm[document_count_filter, ]
+	Inmates <- Inmates[document_count_filter, ]
+	spokenWords = as.data.frame(log(rowSums(as.matrix(dtm))))[,1]
+	
 	set.seed(3)
-	s = get_nrc_sentiment(statements)
+	s = get_nrc_sentiment(Inmates$last_statement)
 	positive_filter = which(s$negative < s$positive)
-	sentiments <- rep(0, length(days_in_jail))
+	sentiments <- rep(0, length(spokenWords))
 	sentiments[positive_filter] = 1
 
-	mydata <- data.frame(days_in_jail, sentiments)
+	mydata <- data.frame(spokenWords, sentiments)
 	mydata$sentiments <- factor(mydata$sentiments)
-	
-	ind <- sample(2, nrow(mydata), replace = T, prob = c(0.99, 0.01))
+	print(table(mydata$sentiments))
+
+	ind <- sample(2, nrow(mydata), replace = T, prob = c(0.5, 0.5))
 	train <- mydata[ind == 1,]
 	test <- mydata[ind == 2,]
 	m <- glm(sentiments~., data = train, family = 'binomial' )
 
 	setEPS()
-	postscript("plots/days-on-death-row-vs-negativity/last_stmtvs_negativity_corr.eps",width=5,height=4)
+	postscript("plots/spoken-words-vs-negativity/spoken_words_negativity_corr.eps",width=5,height=4)
 	plot_colors = c("#de536b", "black")
-	plot(days_in_jail, pch = 19, col = plot_colors, ylim=c(-9000,0), xlab="Last Statement Id", ylab="Days on Death Row")
-	legend("bottom",c("Negative Sentiment", "Positive Sentiment"),cex=.8,col= plot_colors,pch=19)
+	plot(spokenWords, pch = 19, col = plot_colors, xlab="Last Statement Id", ylab="log(Spoken Words)")
+	legend("topright",c("Negative Sentiment", "Positive Sentiment"),cex=.8,col= plot_colors,pch=19)
 	dev.off()
 
 	setEPS()
-	postscript("plots/days-on-death-row-vs-negativity/roc_negativity.eps",width=5,height=4)
+	postscript("plots/spoken-words-vs-negativity/roc_spoken_words_negativity.eps",width=5,height=4)
 	p1 <- predict(m, train, type = 'response')
 	print(table(Predicted = ifelse(p1 > 0.71, 0, 1), Actual = train$sentiments))
 	r <- multiclass.roc(train$sentiments, p1, percent = TRUE)
