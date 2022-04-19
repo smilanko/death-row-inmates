@@ -60,9 +60,9 @@ extractAnswer <- function(Inmates) {
 
 	setEPS()
 	postscript("plots/spoken-words-vs-negativity/spoken_words_negativity_corr.eps",width=5,height=4)
-	plot_colors = c("#de536b", "black")
-	plot(spokenWords, pch = 19, col = plot_colors, xlab="Last Statement Id", ylab="log(Spoken Words)")
-	legend("topright",c("Negative Sentiment", "Positive Sentiment"),cex=.8,col= plot_colors,pch=19)
+	plot_data <- as.data.frame(cbind(spokenWords, sentiments))
+	plot(jitter(plot_data$sentiments), plot_data$spokenWords, pch = 16, col = "#de536b", xaxt="n", ylab="log(Spoken Words)", xlab="Sentiment")
+	axis(1, xaxp=c(0, 1, 1), las=1)
 	dev.off()
 
 	setEPS()
