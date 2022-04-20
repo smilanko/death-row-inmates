@@ -17,10 +17,27 @@ library("caret")
 library("pROC")
 library("nnet")
 library("e1071")
+library("tidytext")
+library("tidyr")
 source("prepareInmateDocument.r")
 
 # silence the warning, since this script is verified
 options(warn=-1)
+
+classifySentimentViaDoc <- function(dtm, library) {
+	s = tidy(dtm) %>%
+	  inner_join(get_sentiments(library), by = c(term = "word")) %>%
+	  count(document, sentiment, wt = count) %>%
+	  spread(sentiment, n, fill = 0) %>%
+	  mutate(sentiment = positive - negative) %>%
+	  arrange(sentiment)
+	return(which(s$negative < s$positive))
+}
+
+classifySentiment <- function(Inmates) {
+	s = get_nrc_sentiment(Inmates$last_statement)
+	return(which(s$negative < s$positive))
+}
 
 extractAnswer <- function(Inmates) {
 	# check if we have any empty statements
@@ -43,8 +60,8 @@ extractAnswer <- function(Inmates) {
 	spokenWords = as.data.frame(log(rowSums(as.matrix(dtm))))[,1]
 	
 	set.seed(3)
-	s = get_nrc_sentiment(Inmates$last_statement)
-	positive_filter = which(s$negative < s$positive)
+	positive_filter = classifySentiment(Inmates)
+	# positive_filter = classifySentimentViaDoc(dtm, "bing") # c("bing", "loughran", "nrc")
 	sentiments <- rep(0, length(spokenWords))
 	sentiments[positive_filter] = 1
 
