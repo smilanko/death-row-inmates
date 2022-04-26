@@ -34,6 +34,14 @@ classifySentimentViaDoc <- function(dtm, library) {
 	return(which(s$negative < s$positive))
 }
 
+calculateAccuracy <- function(matrix) {
+	TN = matrix[1]
+	FN = matrix[2]
+	FP = matrix[3]
+	TP = matrix[4]
+	print(paste("Sensitivity:", ((TP) / (TP+FN)), "Specificity:", ((TN) / (TN+FP)),  "Accuracy:", ((TP + TN) / (TP + FP + TN + FN))))
+}
+
 classifySentiment <- function(Inmates) {
 	s = get_nrc_sentiment(Inmates$last_statement)
 	return(which(s$negative < s$positive))
@@ -48,7 +56,7 @@ extractAnswer <- function(Inmates) {
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
 	documents = tm_map(documents, removePunctuation)
-	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written", "mumbled"))
+	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed"))
 	documents <- tm_map(documents, stripWhitespace)
 
 	# create a document term matrix
@@ -106,8 +114,10 @@ extractAnswer <- function(Inmates) {
 	pval = 0.706
 	print("### Test confusion matrix")
 	print(table(Predicted = ifelse(p2 > pval, 1, 0), Actual = test$sentiments))
+	calculateAccuracy(table(Predicted = ifelse(p2 > pval, 1, 0), Actual = test$sentiments))
 	print("### Train confusion matrix")
 	print(table(Predicted = ifelse(p1 > pval, 1,0), Actual = train$sentiments))
+	calculateAccuracy(table(Predicted = ifelse(p1 > pval, 1,0), Actual = train$sentiments))
 }
 
 # load the inmates
