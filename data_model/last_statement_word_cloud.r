@@ -7,11 +7,14 @@ library("webshot")
 source("prepareInmateDocument.r")
 
 createWordCloudForLastStatement <- function(Inmates) {
+	empty_last_statement_filter = which(Inmates$last_statement == "")
+	Inmates <- Inmates[-empty_last_statement_filter, ]
+
 	# do some transformations on the text
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
 	documents = tm_map(documents, removePunctuation)
-	documents = tm_map(documents, removeWords, stopwords("english"))
+	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed", "ahh"))
 	documents <- tm_map(documents, stripWhitespace)
 
 	# create a matrix for a word cloud chart

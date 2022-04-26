@@ -20,7 +20,7 @@ extractAnswer <- function(Inmates) {
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
 	documents = tm_map(documents, removePunctuation)
-	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed"))
+	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed", "ahh"))
 	documents <- tm_map(documents, stripWhitespace)
 
 	# create a document term matrix

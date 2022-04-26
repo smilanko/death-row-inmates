@@ -6,6 +6,10 @@ library("rapport")
 cleanupLastStatement <- function(stmt) {
 	# nothing was said
 	if (length(stmt) == 0) {return("")}
+	# remove weird hyphens
+	stmt = str_replace_all(stmt, "–", " ")
+	# remove weird single quotes
+	stmt = str_replace_all(stmt, "’", "'")
 	# remove multi space
 	stmt = str_replace_all(stmt, " +", " ")
 	# remove forward slashes
