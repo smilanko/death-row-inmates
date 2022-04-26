@@ -20,7 +20,7 @@ extractAnswer <- function(Inmates) {
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
 	documents = tm_map(documents, removePunctuation)
-	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written", "mumbled"))
+	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed"))
 	documents <- tm_map(documents, stripWhitespace)
 
 	# create a document term matrix
@@ -29,6 +29,7 @@ extractAnswer <- function(Inmates) {
 	document_count_filter = rowTotals> 2 # get documents with at least 2 words
 	dtm <- dtm[document_count_filter, ] 
 	spokenWords = as.data.frame(log(rowSums(as.matrix(dtm))))[,1]
+	print(paste("mean:", mean(spokenWords), "median:", median(spokenWords)))
 
 	# how long is the inmate in jail
 	days_in_jail = difftime(as.Date(Inmates$date_received, format = "%m/%d/%Y"), as.Date(Inmates$execution_date, format = "%m/%d/%Y"), units = "days")
