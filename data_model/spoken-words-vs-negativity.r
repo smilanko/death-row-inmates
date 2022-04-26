@@ -68,9 +68,9 @@ extractAnswer <- function(Inmates) {
 	Inmates <- Inmates[document_count_filter, ]
 	spokenWords = as.data.frame(log(rowSums(as.matrix(dtm))))[,1]
 	
-	set.seed(3)
-	# positive_filter = classifySentiment(Inmates)
-	positive_filter = classifySentimentViaDoc(dtm, "nrc") # c("bing", "loughran", "nrc")
+	set.seed(123)
+	positive_filter = classifySentiment(Inmates)
+	# positive_filter = classifySentimentViaDoc(dtm, "nrc") # c("bing", "loughran", "nrc")
 	sentiments <- rep(0, length(spokenWords))
 	sentiments[positive_filter] = 1
 
