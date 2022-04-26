@@ -14,17 +14,19 @@ createWordCloudForLastStatement <- function(Inmates) {
 	documents <- Corpus(VectorSource(Inmates$last_statement))
 	documents = tm_map(documents, content_transformer(tolower))
 	documents = tm_map(documents, removePunctuation)
+	documents = tm_map(documents, removeNumbers)
 	documents = tm_map(documents, removeWords, c(stopwords("english"),"spoken","verbal","written","mumble","recite","garble","unintelligible", "english", "spanish", "french", "vietnamese", "translate", "irish", "statement", "mouthed", "listed", "ahh"))
 	documents <- tm_map(documents, stripWhitespace)
 
 	# create a matrix for a word cloud chart
 	tdm = TermDocumentMatrix(documents) %>%  as.matrix()
 	words = sort(rowSums(tdm), decreasing = TRUE)
+	words = words[words > 25]
 	df = data.frame(word = names(words), freq = words)
 
 	webshot::install_phantomjs()
 	set.seed(1223)
-	uxc.colors = c("#e63946", "#f6bd60", "#0a9396", "#005f73", "#001219")
+	uxc.colors = c("#e63946", "#f6bd60", "#0a9396", "#005f73", "#001219", "#d2691e")
 	fonts()
 	hw <- wordcloud2(df,
 	           color = rep_len(uxc.colors, nrow(df)),
