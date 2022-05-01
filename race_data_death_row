@@ -7,44 +7,20 @@ source("prepareInmateDocument.r")
 setwd('~/Documents/GitHub/death-row-inmates/data_model')
 
 extractAnswer <- function(Inmates) {
-# set the seed
-	set.seed(3)
 
-	
 	# check if we have any empty race values
 	empty_race_filter = which(Inmates$race == "")
 	Inmates <- Inmates[-empty_race_filter, ]
 	
-	# Replacing NA’s with median of the remaining values
-	Inmates$race[is.na(Inmates$race)] <- str_remove(Inmates$race, "N/A") 
 
-	# we have the inmate's education level.
+	# we have the inmate's race.
   inmate_race = Inmates$race
-
-	m1 = lm(spokenWords ~ ed_level)
-	setEPS()
-	postscript("./plots/ed-level-vs-words-spoken/ed_linear_model.eps",width=12.5,height=4)
-	par(mfrow=c(1,4))
-	plot(m1)
-	dev.off()
-	print(summary(m1))
-
-	# coorelation plot
-	setEPS()
-	postscript("plots/ed-level-vs-words-spoken/ed_variable_correlation.eps")	
-    pairs.panels(data.frame(ed_level, spokenWords), labels =c('Education Level', 'log(Spoken Words)'), smooth = TRUE, scale = FALSE, density = TRUE, ellipses = TRUE,  method = "pearson",  pch = 21, lm = FALSE, cor = TRUE, jiggle = FALSE, factor = 2,  hist.col = 4, stars = TRUE,  ci = TRUE)
-    dev.off()
     
   #pie chart of race
-  tab <- table(iris$Species)
-  pie(tab) then add a title - pie(tab, main = ‘Breakdown of Iris Species’)
+  tab <- table(Inmates$race)
+  pie(tab, main = ‘Breakdown of Race on Death Row’)
   
   #barplot of race
   barplot(tab, col = rainbow(3))
 
 }
-
-# load the inmates
-Inmates = prepareInmateDocument()
-extractAnswer(Inmates)
-print("we've answered the question!! take a look at the model! 🤞")
