@@ -1,8 +1,0 @@
-library("dplyr")
-library("rapport")
-library("tm")
-library("data.table") 
-library("psych")
-source("prepareInmateDocument.r")
-
-extractAnswer <- function(Inmates) {
