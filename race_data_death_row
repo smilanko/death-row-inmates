@@ -1,26 +1,53 @@
-library("dplyr")
-library("rapport")
-library("tm")
-library("data.table") 
-library("psych")
-source("prepareInmateDocument.r")
+install.packages("dplyr")
+install.packages("rapport")
+install.packages("tm")
+install.packages("data.table")
+install.packages("psych")
+install.packages("ggplot2")
+
+library('dplyr')
+library('rapport')
+library('tm')
+library('data.table') 
+library('psych')
+library('ggplot2')
+source('prepareInmateDocument.r')
+Inmates = prepareInmateDocument()
 setwd('~/Documents/GitHub/death-row-inmates/data_model')
+str(Inmates)
+summary(Inmates)
 
-extractAnswer <- function(Inmates) {
+inmate_race = Inmates$race
 
-	# check if we have any empty race values
-	empty_race_filter = which(Inmates$race == "")
-	Inmates <- Inmates[-empty_race_filter, ]
-	
+race_table <- table(inmate_race)
 
-	# we have the inmate's race.
-  inmate_race = Inmates$race
-    
-  #pie chart of race
-  tab <- table(Inmates$race)
-  pie(tab, main = ‘Breakdown of Race on Death Row’)
-  
-  #barplot of race
-  barplot(tab, col = rainbow(3))
+str(race_table)
 
-}
+race_table <- table(Inmates$race)
+pie(race_table, main = 'Race of Death Row Inmates', labels = count(race_table)
+pie(race_table, labels = paste0(race_table, "%"))
+
+legend("topleft", legend = c("White", "Black", "Hispanic", "Other"),
+       fill =  c("white", "lightblue", "mistyrose", "gray"))
+
+# install.packages("lessR")
+library(lessR)
+
+# Store the variable as data frame
+race_data <- data.frame(race_table)
+
+# construct pie chart
+pie(as.numeric(race_data$Var1))
+
+#barplot of race
+barplot(race_data$Freq, xlab = 'Race', ylab = 'Frequency', main = 'Race Distribution Across TX Inmates', names.arg = race_data$Var1)
+dev.off()
+
+# test for probability and rejecting the null hyp
+prop.test(x = c(.45*574, .56*2469),n = c(574, 2469))
+
+# Gender Distro
+inmate_gender = Inmates$gender
+gender_table <- table(inmate_gender)
+
+str(gender_table)
