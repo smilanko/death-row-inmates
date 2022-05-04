@@ -54,6 +54,7 @@ forgive
 
 
 m1 = lm(forgive~days_in_jail)
+print(summary(m1))
 
 #jitterplot
 setEPS()
