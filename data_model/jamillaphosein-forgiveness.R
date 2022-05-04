@@ -55,10 +55,11 @@ forgive
 
 m1 = lm(forgive~days_in_jail)
 
-#correlation plot
+#jitterplot
 setEPS()
-postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_correlation.eps",width=12.5,height=10)
-pairs.panels(data.frame(days_in_jail, forgive), labels =c('Days on Death Row', 'Presence of Forgive in Last Statement'), smooth = TRUE, scale = FALSE, density = TRUE, ellipses = TRUE,  method = "spearman",  pch = 21, lm = FALSE, cor = TRUE, jiggle = FALSE, factor = 2,  hist.col = 4, stars = TRUE,  ci = TRUE)
-
-
-
+postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_jitterplot.eps",width=5,height=4)
+p_data <- as.data.frame(cbind(days_in_jail, forgive))
+forgive <- as.numeric(forgive)
+plot(jitter(p_data$forgive), p_data$days_in_jail, pch = 16, col = "#de536b", xaxt="n", ylab="Days in Jail", xlab="Forgive")
+axis(1, xaxp=c(0, 1, 1), las=1)
+dev.off()
