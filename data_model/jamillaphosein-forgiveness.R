@@ -55,14 +55,6 @@ forgive
 
 m1 = lm(forgive~days_in_jail)
 
-
-setEPS()
-postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_linear.eps",width=12.5,height=4)
-par(mfrow=c(1,4))
-plot(m1)
-dev.off()
-print(summary(m1))
-
 #correlation plot
 setEPS()
 postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_correlation.eps",width=12.5,height=4)
