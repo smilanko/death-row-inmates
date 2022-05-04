@@ -53,9 +53,6 @@ days_in_jail
 forgive
 
 
-m1 = lm(forgive~days_in_jail)
-print(summary(m1))
-
 #jitterplot
 setEPS()
 postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_jitterplot.eps",width=5,height=4)
@@ -64,3 +61,32 @@ forgive <- as.numeric(forgive)
 plot(jitter(p_data$forgive), p_data$days_in_jail, pch = 16, col = "#de536b", xaxt="n", ylab="Days in Jail", xlab="Forgive")
 axis(1, xaxp=c(0, 1, 1), las=1)
 dev.off()
+
+#roc curve
+ind <- sample(2, nrow(p_data), replace = T, prob = c(0.7, 0.3))
+train <- p_data[ind == 1,]
+test <- p_data[ind == 2,]
+m2 <- glm(forgive~., data = train, family = 'binomial' )
+print(summary(m2))
+
+p1 <- predict(m2, train, type = 'response')
+p2 <- predict(m2, test, type = 'response')
+
+postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_roc.eps",width=5,height=4)
+r_one <- multiclass.roc(train$forgive, p1, percent = TRUE)
+roc_one <- r_one[['rocs']]
+r1 <- roc_one[[1]]
+plot.roc(r1, main = 'ROC Curve for Train Data', col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
+auc(r1)
+coords(r1, "best", ret="threshold", transpose = FALSE)
+dev.off()
+
+postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_roc2.eps",width=5,height=4)
+r_two <- multiclass.roc(test$forgive, p2, percent = TRUE)
+roc_two <- r_two[['rocs']]
+r2 <- roc_two[[1]]
+plot.roc(r2, main = 'ROC Curve for Test Data', col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
+auc(r2)
+coords(r2, "best", ret="threshold", transpose = FALSE)
+dev.off()
+
