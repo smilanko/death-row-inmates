@@ -53,8 +53,8 @@ days_in_jail
 forgive
 
 
-m1 = lm(forgive~days_in_jail)
-print(summary(m1))
+m2 = lm(forgive~days_in_jail)
+print(summary(m2))
 
 #jitterplot
 setEPS()
