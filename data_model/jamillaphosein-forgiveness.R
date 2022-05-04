@@ -9,6 +9,9 @@ library("tm")
 library("psych")
 library("sjmisc")
 library("grDevices")
+library("pROC")
+
+
 
 setwd("~/Downloads/death-row-inmates-main 2/data_model")
 
@@ -20,7 +23,7 @@ Inmates = prepareInmateDocument()
 options(warn=-1)
 
 #set seed 
-set.seed(9)
+set.seed(11)
 
 #filter out empty statements
 empty_last_statement_filter = which(Inmates$last_statement == "")
@@ -52,7 +55,6 @@ forgive <- forgive[-jail_sentence_filter]
 days_in_jail
 forgive
 
-
 #jitterplot
 setEPS()
 postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_jitterplot.eps",width=5,height=4)
@@ -72,16 +74,14 @@ print(summary(m2))
 p1 <- predict(m2, train, type = 'response')
 p2 <- predict(m2, test, type = 'response')
 
-postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_roc.eps",width=5,height=4)
+postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_roc.eps",width=6,height=3)
+par(mfrow=c(1,2))
 r_one <- multiclass.roc(train$forgive, p1, percent = TRUE)
 roc_one <- r_one[['rocs']]
 r1 <- roc_one[[1]]
 plot.roc(r1, main = 'ROC Curve for Train Data', col = 'red', lwd = 5, print.auc = T, auc.polygon = T, max.auc.polygon = T, auc.polygon.col = 'lightblue', print.thres = T)
 auc(r1)
 coords(r1, "best", ret="threshold", transpose = FALSE)
-dev.off()
-
-postscript("~/Downloads/death-row-inmates-main 2/data_model/plots/forgiveness_plots/forgive_roc2.eps",width=5,height=4)
 r_two <- multiclass.roc(test$forgive, p2, percent = TRUE)
 roc_two <- r_two[['rocs']]
 r2 <- roc_two[[1]]
